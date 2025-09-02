@@ -1,0 +1,50 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Environment variables
+.env
+.env.*
+
+# Poetry
+poetry.lock
+
+# Pytest / coverage / testing
+htmlcov/
+.tox/
+.nox/
+.coverage
+coverage.*
+.cache
+.pytest_cache/
+
+# mypy / type checkers / linters
+.mypy_cache/
+.dmypy.json
+.pyre/
+ruff_cache/
+
+# VS Code
+.vscode/
+
+# macOS files
+.DS_Store
+
+# Docker
+__docker_build__/
+docker-compose.override.yml
+
+# Logs / debug
+*.log
+
+# Data files
+/data/

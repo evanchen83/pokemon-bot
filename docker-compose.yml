@@ -1,0 +1,7 @@
+services:
+  discord-bot:
+    image: pokemon-bot:latest
+    env_file:
+      - .env
+    volumes:
+      - ./bot:/app/bot
