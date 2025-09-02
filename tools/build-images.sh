@@ -28,5 +28,5 @@ build_image() {
   echo "Image built: $image_tag"
 }
 
-# build_image "pokemon-bot-base" "docker/bot-base/Dockerfile"
+build_image "pokemon-bot-base" "docker/bot-base/Dockerfile"
 build_image "pokemon-bot" "docker/bot/Dockerfile"
