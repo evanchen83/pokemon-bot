@@ -8,7 +8,8 @@ POKEMON_TCG_API_KEY=your_pokemon_tcg_api_key_here
 OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-Build the images:
+Build and run the images:
 ```bash
 ./tools/build-images.sh
+docker compose up -d 
 ```
