@@ -1,6 +1,6 @@
 ## Setup Instructions
 
-To configure the bot, set the following environment variables in your `.env` file or export them directly in your shell:
+To configure the bot, set the following environment variables in your `.env` file:
 
 ```bash
 DISCORD_BOT_TOKEN=your_discord_token_here
