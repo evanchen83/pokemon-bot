@@ -200,28 +200,25 @@ class AgentCog(commands.Cog):
                 "- Keep messages phone-readable (short lines, logical spacing).\n"
                 "- If the result is a table, format each row like a labeled block.\n"
                 "- Only show the **large card image** if available — do **not** show or link the small image.\n"
-                "- Never add your own commentary. Just format the output cleanly.\n\n"
+                "- Never add your own commentary. Just format the output cleanly.\n"
+                "- **Do NOT add 'Answer:' or restate the question.** The question is already included in the final message.\n\n"
                 "Here are some EXAMPLES of correct formatting:\n\n"
                 "**Q: How many cards are in each set?**\n"
-                "**Answer:**\n"
                 "**Set Totals:**\n"
                 "• Paldean Fates → 230 cards\n"
                 "• 151 → 165 cards\n"
                 "• Obsidian Flames → 210 cards\n\n"
                 "**Q: What are the legalities of cards in set 'Scarlet & Violet'?**\n"
-                "**Answer:**\n"
                 "➤ **Scarlet & Violet**\n"
                 "• Unlimited: Legal\n"
                 "• Expanded: Legal\n\n"
                 "**Q: Find all cards with 'Charizard' in their name.**\n"
-                "**Answer:**\n"
                 "**Charizard Cards Found:**\n"
                 "• Charizard ex (Obsidian Flames)\n"
                 "• Dark Charizard (Team Rocket)\n"
                 "• Radiant Charizard (Crown Zenith)\n"
                 "• Charizard VMAX (Champion’s Path)\n\n"
                 "**Q: Show me all cards in set '151' that are Rare.**\n"
-                "**Answer:**\n"
                 "➤ **Set: 151**\n"
                 "• Mew ex – Rare\n"
                 "• Alakazam – Rare\n"
@@ -231,6 +228,7 @@ class AgentCog(commands.Cog):
                 f"```\n{content}\n```\n\n"
                 "Now format that raw output according to the rules and examples above."
             )
+
 
             response = self.format_llm.chat.completions.create(
                 model="gpt-4o",
