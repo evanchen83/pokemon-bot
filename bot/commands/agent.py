@@ -171,6 +171,26 @@ class AgentCog(commands.Cog):
     async def ask_agent(self, interaction: Interaction, question: str):
         await interaction.response.defer()
         try:
+            check_prompt = (
+                "Decide if the user question is about the Pokémon Trading Card Game "
+                "(cards, sets, rarities, legalities, images, etc).\n"
+                "If YES, reply only with 'POKEMON'.\n"
+                "If NO, reply only with 'OTHER'.\n\n"
+                f"Question: {question}"
+            )
+            check_resp = self.format_llm.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": check_prompt}],
+                max_tokens=5,
+            )
+            check_label = check_resp.choices[0].message.content.strip().upper()
+
+            if check_label != "POKEMON":
+                await interaction.followup.send(
+                    "⚠️ This command only supports Pokémon TCG questions (cards, sets, rarities, etc)."
+                )
+                return
+
             full_prompt = f"""{self.description_text}\n\nNow answer this: {question}"""
             raw_result = self.agent.chat(full_prompt)
 
