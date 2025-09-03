@@ -16,7 +16,7 @@ from bot.utils.logging_utils import inject_log_context, log_time
 logger = logging.getLogger(__name__)
 DATA_DIR = Path("/app/data")
 MAX_CHARACTERS = 1800
-MAX_AGENT_RESULT_ROWS = 300
+MAX_AGENT_RESULT_ROWS = 500
 
 
 def chunk_text(text: str, max_len: int = MAX_CHARACTERS) -> list[str]:
