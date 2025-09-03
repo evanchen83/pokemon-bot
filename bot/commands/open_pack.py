@@ -116,13 +116,6 @@ class OpenPackCog(commands.Cog):
             if img:
                 image_urls.append(img)
 
-        if not image_urls:
-            await interaction.response.send_message(
-                f"⚠️ Couldn’t find images for pack from **{set_name}**.",
-                ephemeral=True,
-            )
-            return
-
         view = PackView(image_urls, set_name=set_name)
         await interaction.response.send_message(
             content=f"🎉 {interaction.user.mention} opened a pack from **{set_name}**!",
