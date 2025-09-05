@@ -145,12 +145,18 @@ class TradeCardCog(commands.Cog):
             await interaction.response.send_message(f"❌ {target_user.display_name} doesn't have that card.", ephemeral=True)
             return
 
+        my_card_data = self.card_lookup.get(my_card_id)
+        their_card_data = self.card_lookup.get(their_card_id)
+
+        my_rarity = my_card_data.get("rarity", "Unknown") if my_card_data else "Unknown"
+        their_rarity = their_card_data.get("rarity", "Unknown") if their_card_data else "Unknown"
+
         embed = discord.Embed(
             title="🔁 Trade Request",
             description=(
                 f"**{interaction.user.display_name}** wants to trade with **{target_user.display_name}**!\n\n"
-                f"**You give:** {my_card} ({my_set})\n"
-                f"**You get:** {their_card} ({their_set})\n\n"
+                f"**You give:** {my_card} ({my_set}) — *{my_rarity}*\n"
+                f"**You get:** {their_card} ({their_set}) — *{their_rarity}*\n\n"
                 f"{target_user.mention}, react below to accept or reject."
             ),
             color=discord.Color.orange(),
