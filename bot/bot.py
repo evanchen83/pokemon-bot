@@ -38,6 +38,6 @@ async def setup_hook():
     await bot.load_extension("bot.commands.open_pack")
     await bot.load_extension("bot.commands.agent")
     await bot.load_extension("bot.commands.show_cards")
-
+    await bot.load_extension("bot.commands.trade_card")
 
 bot.run(os.getenv("DISCORD_BOT_TOKEN"))
