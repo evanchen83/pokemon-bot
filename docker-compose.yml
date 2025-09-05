@@ -1,7 +1,59 @@
+version: "3.8"
+
 services:
   discord-bot:
     image: pokemon-bot:latest
     env_file:
       - .env
+    environment:
+      DB_HOST: card-db
+      DB_PORT: "5432"
+      DB_NAME: cards
+      DB_USER: postgres
+      DB_PASSWORD: postgres
     volumes:
       - ./bot:/app/bot
+    depends_on:
+      - card-db
+    networks:
+      - card-net
+
+  card-db:
+    image: postgres:16
+    container_name: card-db
+    restart: always
+    environment:
+      POSTGRES_DB: cards
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - card-db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - card-net
+
+  card-db-init:
+    image: liquibase/liquibase:latest
+    container_name: card-db-init
+    depends_on:
+      - card-db
+    volumes:
+      - .:/liquibase/changelog
+    working_dir: /liquibase/changelog
+    command:
+      [
+        "--url=jdbc:postgresql://card-db:5432/cards",
+        "--changeLogFile=changelog.sql",
+        "--username=postgres",
+        "--password=postgres",
+        "update"
+      ]
+    networks:
+      - card-net
+
+volumes:
+  card-db-data:
+
+networks:
+  card-net:

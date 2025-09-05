@@ -37,5 +37,7 @@ async def ping(interaction: discord.Interaction):
 async def setup_hook():
     await bot.load_extension("bot.commands.open_pack")
     await bot.load_extension("bot.commands.agent")
+    await bot.load_extension("bot.commands.show_cards")
+
 
 bot.run(os.getenv("DISCORD_BOT_TOKEN"))

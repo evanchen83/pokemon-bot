@@ -15,9 +15,6 @@ venv/
 .env
 .env.*
 
-# Poetry
-poetry.lock
-
 # Pytest / coverage / testing
 htmlcov/
 .tox/

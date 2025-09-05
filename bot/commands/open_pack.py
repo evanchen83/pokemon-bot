@@ -9,6 +9,7 @@ from discord.ext import commands
 
 from bot.utils.logging_utils import inject_log_context, log_time
 from bot.views.pack_view import PackView
+from bot import db 
 
 logger = logging.getLogger(__name__)
 
@@ -108,6 +109,15 @@ class OpenPackCog(commands.Cog):
             random.sample(rares_or_better, min(2, len(rares_or_better)))
         )
 
+        discord_id = str(interaction.user.id)
+        new_cards = {}
+
+        for card in pack:
+            card_id = card["id"]
+            new_cards[card_id] = new_cards.get(card_id, 0) + 1
+
+        db.add_cards(discord_id, new_cards)
+        
         image_urls = []
         for card in pack:
             img = card.get("images", {}).get("large") or card.get("images", {}).get(
