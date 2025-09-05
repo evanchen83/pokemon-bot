@@ -14,11 +14,15 @@ from bot.views.deck_view import DeckView
 logger = logging.getLogger(__name__)
 DATA_DIR = Path("/app/data")
 
+RARITY_ORDER = {
+    "Common": 0,
+    "Uncommon": 1,
+    "Rare": 2,
+}
 
 class ShowCardsCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
         with open(DATA_DIR / "cards.json", "r", encoding="utf-8") as f:
             self.cards_data = json.load(f)
         self.card_lookup = {card["id"]: card for card in self.cards_data}
@@ -28,7 +32,6 @@ class ShowCardsCog(commands.Cog):
         interaction: Interaction,
         current: str,
     ) -> list[app_commands.Choice[str]]:
-        """Autocomplete handler: shows only sets the player owns cards from."""
         discord_id = str(interaction.user.id)
         player_cards = db.get_cards(discord_id)
         owned_sets = set()
@@ -75,21 +78,27 @@ class ShowCardsCog(commands.Cog):
             if set_name and current_set != set_name:
                 continue
 
-            grouped[current_set].append(f"• {name} — {rarity} — x{qty}")
+            grouped[current_set].append((rarity, name, f"• {name} — {rarity} — x{qty}"))
 
         if not grouped:
             await interaction.response.send_message(f"📭 You don't have any cards from the set **{set_name}**.")
             return
 
+        def sort_key(item):
+            rarity, name, _ = item
+            return (RARITY_ORDER.get(rarity, 99), rarity, name)
+
         parts = []
         for current_set, entries in grouped.items():
-            parts.append(f"📦 **{current_set}**\n" + "\n".join(entries))
+            sorted_entries = [line for *_, line in sorted(entries, key=sort_key)]
+            parts.append(f"📦 **{current_set}**\n" + "\n".join(sorted_entries))
         full_text = "\n\n".join(parts)
 
         view = DeckView(full_text)
         await interaction.response.send_message(embed=view.current_embed, view=view)
 
         logger.info(f"{interaction.user} viewed their cards (set: {set_name or 'all'})")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(ShowCardsCog(bot))
