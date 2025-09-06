@@ -1,14 +1,14 @@
-import os
 import json
 from psycopg_pool import ConnectionPool
+from bot.settings import config 
 
 DB_POOL = ConnectionPool(
     conninfo=(
-        f"host={os.getenv('DB_HOST', 'localhost')} "
-        f"port={os.getenv('DB_PORT', '5432')} "
-        f"dbname={os.getenv('DB_NAME', 'cards')} "
-        f"user={os.getenv('DB_USER', 'postgres')} "
-        f"password={os.getenv('DB_PASSWORD', 'postgres')}"
+        f"host={config.db_host} "
+        f"port={config.db_port} "
+        f"dbname={config.db_name} "
+        f"user={config.db_user} "
+        f"password={config.db_password}"
     ),
     min_size=1,
     max_size=10,

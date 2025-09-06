@@ -1,9 +1,9 @@
-import os
 import json
 import logging
 import discord
 from discord.ext import commands
 from discord import app_commands
+from bot.settings import config 
 
 from bot.utils.logging_utils import (
     setup_logging,
@@ -40,4 +40,4 @@ async def setup_hook():
     await bot.load_extension("bot.commands.show_cards")
     await bot.load_extension("bot.commands.trade_card")
 
-bot.run(os.getenv("DISCORD_BOT_TOKEN"))
+bot.run(config.discord_bot_token)

@@ -1,17 +1,16 @@
 import time
 import functools
-import os
 from typing import Callable
 
 from discord import Interaction
 from redis.asyncio import Redis
 from redis.backoff import ExponentialBackoff
 from redis.retry import Retry
-
+from bot.settings import config
 
 _redis = Redis(
-    host=os.getenv("REDIS_HOST", "localhost"),
-    port=int(os.getenv("REDIS_PORT", "6379")),
+    host=config.redis_host,
+    port=config.redis_port,
     decode_responses=True,
     retry=Retry(ExponentialBackoff(), retries=3),
 )

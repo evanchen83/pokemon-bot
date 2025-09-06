@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 from pathlib import Path
 
 import discord
@@ -10,7 +9,7 @@ from discord.ext import commands
 from openai import OpenAI as RawOpenAI
 from pandasai import Agent
 from pandasai.llm.openai import OpenAI
-
+from bot.settings import config
 from bot.utils.logging_utils import inject_log_context, log_time
 
 logger = logging.getLogger(__name__)
@@ -149,8 +148,8 @@ class AgentCog(commands.Cog):
             "Do not use or refer to any system-level operations or modules. Stick to analyzing the DataFrame using text and filters."
         )
 
-        self.llm = OpenAI(api_token=os.getenv("OPENAI_API_KEY"))
-        self.format_llm = RawOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.llm = OpenAI(api_token=config.openai_api_key)
+        self.format_llm = RawOpenAI(api_key=config.openai_api_key)
 
         self.agent = Agent(
             df,
