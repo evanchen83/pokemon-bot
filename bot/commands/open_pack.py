@@ -7,9 +7,10 @@ from typing import Dict, List
 from discord import Interaction, app_commands
 from discord.ext import commands
 
+from bot import db
 from bot.utils.logging_utils import inject_log_context, log_time
+from bot.utils.rate_limit import rate_limit
 from bot.views.pack_view import PackView
-from bot import db 
 
 logger = logging.getLogger(__name__)
 
@@ -49,9 +50,9 @@ class OpenPackCog(commands.Cog):
             ]
 
             sample_pack = (
-                random.sample(commons, min(4, len(commons))) +
-                random.sample(uncommons, min(3, len(uncommons))) +
-                random.sample(rares_or_better, min(2, len(rares_or_better)))
+                random.sample(commons, min(4, len(commons)))
+                + random.sample(uncommons, min(3, len(uncommons)))
+                + random.sample(rares_or_better, min(2, len(rares_or_better)))
             )
 
             all_have_images = all(
@@ -82,6 +83,9 @@ class OpenPackCog(commands.Cog):
     @app_commands.command(name="open_pack", description="Open a Pokémon booster pack!")
     @app_commands.describe(set_name="Choose a set to open a pack from")
     @app_commands.autocomplete(set_name=set_autocomplete)
+    @rate_limit(
+        key_func=lambda i: f"open_pack_daily:{i.user.id}", limit=5, period=86400
+    )
     @inject_log_context
     @log_time(logger.info)
     async def open_pack(self, interaction: Interaction, set_name: str):
@@ -104,9 +108,9 @@ class OpenPackCog(commands.Cog):
         ]
 
         pack = (
-            random.sample(commons, min(4, len(commons))) +
-            random.sample(uncommons, min(3, len(uncommons))) +
-            random.sample(rares_or_better, min(2, len(rares_or_better)))
+            random.sample(commons, min(4, len(commons)))
+            + random.sample(uncommons, min(3, len(uncommons)))
+            + random.sample(rares_or_better, min(2, len(rares_or_better)))
         )
 
         discord_id = str(interaction.user.id)
@@ -117,7 +121,7 @@ class OpenPackCog(commands.Cog):
             new_cards[card_id] = new_cards.get(card_id, 0) + 1
 
         db.add_cards(discord_id, new_cards)
-        
+
         image_urls = []
         for card in pack:
             img = card.get("images", {}).get("large") or card.get("images", {}).get(

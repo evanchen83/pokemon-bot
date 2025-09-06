@@ -9,10 +9,13 @@ services:
       DB_NAME: cards
       DB_USER: postgres
       DB_PASSWORD: postgres
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
     volumes:
       - ./bot:/app/bot
     depends_on:
       - card-db
+      - redis
     networks:
       - card-net
 
@@ -47,6 +50,15 @@ services:
         "--password=postgres",
         "update"
       ]
+    networks:
+      - card-net
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
     networks:
       - card-net
 
