@@ -18,15 +18,20 @@ build_image() {
 
   echo "Building image: $image_tag using $dockerfile_path"
 
-  docker build \
+  docker buildx build \
+    --platform=linux/amd64 \
     -f "$dockerfile_path" \
     -t "$image_tag" \
     --build-arg POKEMON_TCG_API_KEY="$POKEMON_TCG_API_KEY" \
-    --pull=False \
+    --pull=false \
+    --load \
     .
+
 
   echo "Image built: $image_tag"
 }
 
-# build_image "pokemon-bot-base" "docker/bot-base/Dockerfile"
+# Build all images
+build_image "pokemon-bot-base" "docker/bot-base/Dockerfile" 
 build_image "pokemon-bot" "docker/bot/Dockerfile"
+build_image "card-db-init" "docker/card-db-init/Dockerfile"

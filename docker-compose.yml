@@ -35,13 +35,10 @@ services:
       - card-net
 
   card-db-init:
-    image: liquibase/liquibase:latest
+    image: card-db-init:latest
     container_name: card-db-init
     depends_on:
       - card-db
-    volumes:
-      - .:/liquibase/changelog
-    working_dir: /liquibase/changelog
     command:
       [
         "--url=jdbc:postgresql://card-db:5432/cards",
