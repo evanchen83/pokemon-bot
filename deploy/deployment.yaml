@@ -1,3 +1,27 @@
+# --- ConfigMap: db-config
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-config
+  labels:
+    app: discord-bot
+data:
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_NAME: cards
+  DB_USER: postgres
+---
+# --- ConfigMap: redis-config
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  labels:
+    app: discord-bot
+data:
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+---
 # --- Secret: discord-secrets
 apiVersion: v1
 kind: Secret
@@ -27,22 +51,49 @@ spec:
       labels:
         app: discord-bot
     spec:
+      initContainers:
+        - name: wait-for-postgres-and-redis
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "⏳ Waiting for Postgres and Redis..."
+              until nc -z "$DB_HOST" "$DB_PORT"; do
+                echo "Waiting for Postgres at $DB_HOST:$DB_PORT..."
+                sleep 2
+              done
+              until nc -z "$REDIS_HOST" "$REDIS_PORT"; do
+                echo "Waiting for Redis at $REDIS_HOST:$REDIS_PORT..."
+                sleep 2
+              done
+              echo "✅ Postgres and Redis are reachable!"
+          envFrom:
+            - configMapRef:
+                name: db-config
+            - configMapRef:
+                name: redis-config
+          resources:
+            requests:
+              cpu: "25m"
+              memory: "32Mi"
+            limits:
+              cpu: "50m"
+              memory: "64Mi"
       containers:
         - name: discord-bot
           image: us-east1-docker.pkg.dev/pokemon-bot-471420/docker/pokemon-bot:latest
+          envFrom:
+            - configMapRef:
+                name: db-config
+            - configMapRef:
+                name: redis-config
           env:
-            - name: REDIS_HOST
-              value: redis
-            - name: REDIS_PORT
-              value: "6379"
-            - name: DB_HOST
-              value: postgres
-            - name: DB_PORT
-              value: "5432"
-            - name: DB_NAME
-              value: cards
-            - name: DB_USER
-              value: postgres
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: discord-secrets
+                  key: DB_PASSWORD
           volumeMounts:
             - name: secret-volume
               mountPath: /etc/secrets
@@ -60,7 +111,6 @@ spec:
         - name: secret-volume
           secret:
             secretName: discord-secrets
-
 ---
 # --- Service: postgres
 apiVersion: v1
@@ -72,7 +122,6 @@ spec:
     - port: 5432
   selector:
     app: postgres
-
 ---
 # --- StatefulSet: postgres
 apiVersion: apps/v1
@@ -97,9 +146,15 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: cards
+              valueFrom:
+                configMapKeyRef:
+                  name: db-config
+                  key: DB_NAME
             - name: POSTGRES_USER
-              value: postgres
+              valueFrom:
+                configMapKeyRef:
+                  name: db-config
+                  key: DB_USER
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -147,7 +202,6 @@ spec:
     - port: 6379
   selector:
     app: redis
-
 ---
 # --- Deployment: redis
 apiVersion: apps/v1
@@ -183,7 +237,6 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 6
-
 ---
 # --- Job: card-db-init
 apiVersion: batch/v1
@@ -199,12 +252,23 @@ spec:
         - name: card-db-init
           image: us-east1-docker.pkg.dev/pokemon-bot-471420/docker/card-db-init:latest
           command:
-            - liquibase
-            - --url=jdbc:postgresql://postgres:5432/cards
-            - --changeLogFile=changelog.sql
-            - --username=postgres
-            - --password=$(DB_PASSWORD)
-            - update
+            - sh
+            - -c
+            - |
+              until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME"; do
+                echo "⏳ Waiting for Postgres to be ready at $DB_HOST:$DB_PORT..."
+                sleep 3
+              done
+              echo "✅ Postgres is ready, running Liquibase..."
+              liquibase \
+                --url="jdbc:postgresql://$DB_HOST:$DB_PORT/$DB_NAME" \
+                --changeLogFile=changelog.sql \
+                --username="$DB_USER" \
+                --password="$DB_PASSWORD" \
+                update
+          envFrom:
+            - configMapRef:
+                name: db-config
           env:
             - name: DB_PASSWORD
               valueFrom:
